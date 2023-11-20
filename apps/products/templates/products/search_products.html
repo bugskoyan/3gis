@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Геолокация пользователя</title>
+</head>
+<body>
+    <h1>Геолокация пользователя</h1>
+    <button id="get-location">Получить мою геолокацию</button>
+
+    <script>
+        document.getElementById('get-location').addEventListener('click', function() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+                    // Здесь можно выполнить запрос к вашему API с полученными координатами
+                    window.location.href = `/nearest-products/?latitude=${latitude}&longitude=${longitude}`;
+                });
+            } else {
+                alert('Геолокация не поддерживается вашим браузером');
+            }
+        });
+    </script>
+</body>
+</html>
