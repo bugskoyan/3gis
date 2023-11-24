@@ -17,7 +17,7 @@ class ProductSerializer(serializers.Serializer):
     )
     poster: str = serializers.ImageField()
     rate: float = serializers.FloatField()
-
+    description = serializers.CharField()
     
         
 

@@ -2,10 +2,43 @@
 <html>
 <head>
     <title>Геолокация пользователя</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #get-location {
+            padding: 10px 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            background-color: #3498db;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #get-location:hover {
+            background-color: #2980b9;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+    </style>
 </head>
 <body>
-    <h1>Геолокация пользователя</h1>
-    <button id="get-location">Получить мою геолокацию</button>
+    <h1>Поиск ближайших товаров</h1>
+    <button id="get-location">Начать</button>
 
     <script>
         document.getElementById('get-location').addEventListener('click', function() {
@@ -13,13 +46,31 @@
                 navigator.geolocation.getCurrentPosition(function(position) {
                     const latitude = position.coords.latitude;
                     const longitude = position.coords.longitude;
-                    // Здесь можно выполнить запрос к вашему API с полученными координатами
+                    
                     window.location.href = `/nearest-products/?latitude=${latitude}&longitude=${longitude}`;
                 });
             } else {
                 alert('Геолокация не поддерживается вашим браузером');
             }
         });
+
+        // function saveUserLocation() {
+        //     navigator.geolocation.getCurrentPosition((position) => {
+        //         const latitude = position.coords.latitude;
+        //         const longitude = position.coords.longitude;
+        //         localStorage.setItem('userLatitude', latitude);
+        //         localStorage.setItem('userLongitude', longitude);
+        //     });
+        // };
+
+        // window.onload = function () {
+        //     if (!window.location.search && localStorage.getItem('userLatitude') && localStorage.getItem('userLongitude')) {
+        //         const userLatitude = localStorage.getItem('userLatitude');
+        //         const userLongitude = localStorage.getItem('userLongitude');
+        //         window.location.href = `/nearest-products/?latitude=${userLatitude}&longitude=${userLongitude}`;
+        //     }
+        // };
+
     </script>
 </body>
 </html>

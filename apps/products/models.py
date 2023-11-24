@@ -19,6 +19,12 @@ class Seller(models.Model):
     longitude = models.FloatField(
         verbose_name= 'долгота',
     )
+    poster: str = models.ImageField(
+        verbose_name='постер',
+        upload_to='posters',
+        null=True,
+        blank=True
+    )
     description = models.TextField(
         verbose_name='описание к продавцу',
         max_length=200,
@@ -102,6 +108,9 @@ class ProductComment(models.Model):
         verbose_name = 'комментарии к продукту'
         verbose_name_plural = 'комментарии к продуктам'
 
+    def __str__(self) -> str:
+        return f'{self.user} | {self.product}'
+
 
 class ProductRating(models.Model):
     user = models.ForeignKey(
@@ -109,7 +118,7 @@ class ProductRating(models.Model):
         to=User, 
         on_delete=models.CASCADE)
     product = models.ForeignKey(
-        verbose_name='комментарии к продукту',
+        verbose_name='рейтинг к продукту',
         to=Product, 
         on_delete=models.CASCADE, 
         related_name='ratings')
@@ -120,6 +129,9 @@ class ProductRating(models.Model):
         ordering = ('-id',)
         verbose_name = 'рейтинг к продукту'
         verbose_name_plural = 'рейтинг к продуктам'
+
+    def __str__(self) -> str:
+        return f'{self.user} | {self.product} | {self.rating}'
 
 
 class SellerComment(models.Model):
@@ -140,6 +152,9 @@ class SellerComment(models.Model):
         verbose_name = 'комментарии к продавцу'
         verbose_name_plural = 'комментарии к продавцам'
 
+    def __str__(self) -> str:
+        return f'{self.user} | {self.seller}'
+
 
 class SellerRating(models.Model):
     user = models.ForeignKey(
@@ -147,7 +162,7 @@ class SellerRating(models.Model):
         to=User, 
         on_delete=models.CASCADE)
     seller = models.ForeignKey(
-        verbose_name='комментарии к продавцу',
+        verbose_name='рейтинг к продавцу',
         to=Seller, 
         on_delete=models.CASCADE, 
         related_name='ratings')
@@ -158,3 +173,6 @@ class SellerRating(models.Model):
         ordering = ('-id',)
         verbose_name = 'рейтинг к продавцу'
         verbose_name_plural = 'рейтинг к продавцам'
+
+    def __str__(self) -> str:
+        return f'{self.user} | {self.seller} | {self.rating}'

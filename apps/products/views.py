@@ -1,10 +1,12 @@
 from django.shortcuts import render
-from django.db.models import query
+from django.db.models import query, Avg
 
 from rest_framework import permissions
 from rest_framework import viewsets, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
+from rest_framework.response import Response
+from rest_framework.generics import ListAPIView
 
 
 from products.models import Seller, Product, ProductComment, SellerComment, ProductRating, SellerRating
@@ -17,6 +19,9 @@ from products.filter import NearestProductFilter
 def search_products_view(request):
     return render(request, 'products/search_products.html')
 
+# def products_page(request):
+#     return render(request, 'products.html')
+
 class SellerViewSet(viewsets.ModelViewSet):
     queryset = Seller.objects.all()
     serializer_class = SellerSerializer
@@ -26,16 +31,43 @@ class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     
 
-class NearestProductViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = ProductSerializer
-    # filter_backends = [DjangoFilterBackend, OrderingFilter]
-    filterset_class = NearestProductFilter
+# class NearestProductViewSet(ListAPIView):
+#     serializer_class = ProductSerializer
+#     filter_backends = [OrderingFilter]
+#     # filterset_class = NearestProductFilter
     
     
 
-    def get_queryset(self):
-        user_latitude = float(self.request.query_params.get('latitude'))
-        user_longitude = float(self.request.query_params.get('longitude'))
+#     def get_queryset(self):
+#         user_latitude = float(self.request.query_params.get('latitude'))
+#         user_longitude = float(self.request.query_params.get('longitude'))
+
+#         queryset = Product.objects.all()
+#         nearest_products = []
+
+#         for product in queryset:
+#             seller = product.seller
+#             distance = ((user_latitude - seller.latitude) ** 2 + (user_longitude - seller.longitude) ** 2) ** 0.5
+#             nearest_products.append((product, distance))
+
+        
+#         nearest_products.sort(key=lambda x: x[0].price)
+
+        
+#         nearest_products.sort(key=lambda x: x[1])
+
+        
+#         return [product for product, _ in nearest_products]
+
+class NearestProductViewSet(viewsets.ViewSet):
+    serializer_class = ProductSerializer
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_class = NearestProductFilter
+
+
+    def list(self, request):
+        user_latitude = float(request.query_params.get('latitude'))
+        user_longitude = float(request.query_params.get('longitude'))
 
         queryset = Product.objects.all()
         nearest_products = []
@@ -45,14 +77,27 @@ class NearestProductViewSet(viewsets.ReadOnlyModelViewSet):
             distance = ((user_latitude - seller.latitude) ** 2 + (user_longitude - seller.longitude) ** 2) ** 0.5
             nearest_products.append((product, distance))
 
-        # Сортировка по цене (предположим, что у продукта есть поле "price")
-        nearest_products.sort(key=lambda x: x[0].price)
-
-        # Затем сортировка по расстоянию
         nearest_products.sort(key=lambda x: x[1])
-
+        serialized_products = []
+        for product, _ in nearest_products:
+            product_data = ProductSerializer(product).data
+            comments = ProductComment.objects.filter(product=product)
+            ratings = ProductRating.objects.filter(product=product)
+            average_rating = ratings.aggregate(Avg('rating'))['rating__avg']
+            product_data['comments'] = ProductCommentSerializer(comments, many=True).data
+            product_data['ratings'] = ProductRatingSerializer(ratings, many=True).data
+            product_data['average_rating'] = average_rating if average_rating else 0.0
+            serialized_products.append(product_data)
         
-        return [product for product, _ in nearest_products]
+
+        context = {'products': serialized_products}
+        return render(request, 'products/products.html', context)
+
+
+    def retrieve(self, request, pk=None):
+        product = Product.objects.get(pk=pk)
+        serialized_product = ProductSerializer(product).data
+        return Response({'product': serialized_product})
     
 
 class ProductCommentViewSet(viewsets.ModelViewSet):
