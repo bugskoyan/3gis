@@ -8,11 +8,6 @@ class Seller(models.Model):
         verbose_name='название организации',
         max_length=255
         )
-    rate: float = models.FloatField(
-        verbose_name='рейтинг',
-        max_length=5,
-        default=0
-    )
     latitude = models.FloatField(
         verbose_name= 'широта',
     )
@@ -64,14 +59,9 @@ class Product(models.Model):
     
     poster: str = models.ImageField(
         verbose_name='постер',
-        upload_to='posters',
+        upload_to='posters/',
         null=True,
         blank=True
-    )
-    rate: float = models.FloatField(
-        verbose_name='рейтинг',
-        max_length=5,
-        default=0
     )
     description = models.TextField(
         verbose_name='описание к товару',

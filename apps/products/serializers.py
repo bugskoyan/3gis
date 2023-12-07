@@ -2,9 +2,18 @@ from rest_framework import serializers
 from .models import Seller, Product, SellerComment, SellerRating, ProductComment, ProductRating
 
 class SellerSerializer(serializers.ModelSerializer):
+    name = serializers.CharField()
+    latitude = serializers.FloatField()
+    longitude = serializers.FloatField()
+    poster: str = serializers.ImageField()
+    description = serializers.CharField()
+    
     class Meta:
         model = Seller
-        fields = '__all__'
+        fields = ['name','latitude','longitude','poster','description']
+
+    
+
 
 class ProductSerializer(serializers.Serializer):
     name = serializers.CharField()
@@ -12,16 +21,20 @@ class ProductSerializer(serializers.Serializer):
         max_digits=10, 
         decimal_places=2
     )
-    seller = serializers.StringRelatedField(
-        many=False, 
-    )
+    seller = serializers.StringRelatedField()
     poster: str = serializers.ImageField()
-    rate: float = serializers.FloatField()
     description = serializers.CharField()
+
+    class Meta:
+        model = Product
+        fields = ['name','price','seller','poster','description']
+
     
         
 
 class ProductCommentSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()
+
     class Meta:
         model = ProductComment
         fields = '__all__'

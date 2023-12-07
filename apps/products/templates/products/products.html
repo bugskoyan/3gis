@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Nearest Products</title>
+    <title>3GIS</title>
+    <link rel="icon" href="ico/mapicon.png/" type="image/x-icon">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -42,12 +43,16 @@
         }
 
         .product img {
+            align-items: center;
             max-width: 100%;
             height: auto;
             border: 1px solid #ccc;
             border-radius: 5px;
             padding: 5px;
             box-sizing: border-box;
+            width: 400px; 
+            height: 300px; 
+            object-fit: cover; 
         }
 
         .search-container {
@@ -69,14 +74,21 @@
             flex-wrap: wrap;
             justify-content: space-around;
         }
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+        
     </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ mapkey }}" async defer></script>
 </head>
 <body>
     <h1>Ближайшие товары</h1>
 
     <div class="search-container">
         <form id="search-form">
-            <input type="text" id="search-input" placeholder="Search...">
+            <input type="text" id="search-input" placeholder="Поиск...">
             <button type="submit">Поиск</button>
         </form>
     </div>
@@ -86,41 +98,59 @@
         {% for product in products %}
         <div class="product">
             <h2>{{ product.name }}</h2>
-            <img src="{{ product.poster }}" alt="{{ product.name }} Image">
-            <p>Цена: {{ product.price }} $</p>
-            <p>Продавец: {{ product.seller }}</p>
-            <p>Описание: {{ product.description }}</p>
+            <img src="{{ product.product.poster }}" alt="{{ product.name }} Image">
+            <p>Цена: {{ product.product.price }} $</p>
+            <p>Продавец: {{ product.product.seller }}</p>
+            <p>Описание: {{ product.product.description }}</p>
             <p>Рейтинг: {{ product.average_rating }}</p>
-            <ul>
+            <ul>Комментарии:
                 {% for comment in product.comments %}
-                <li>Комментарии: {{ comment.text }} : {{ comment.user }}</li>
+                <li>{{ comment.user }} : {{ comment.text }} </li>
                 {% endfor %}
             </ul>
         </div>
         {% endfor %}
     </div>
 
+    <!-- <div class="pagination">
+        {% if products.previous %}
+            <a href="?page=1">Первая</a>
+            <a href="?page={{ products.pages }}">Предыдущая</a>
+        {% endif %}
+
+        <span>Страница {{ products.number }} из {{ products.paginator.num_pages }}</span>
+
+        {% if products.next %}
+            <a href="?page={{ products.next_page_number }}">Следующая</a>
+            <a href="?page={{ products.paginator.num_pages }}">Последняя</a>
+        {% endif %}
+    </div> -->
+
+    <div id="map">
+        <div id="info-window-content"></div>
+    </div>
+
     <script>
-        fetch('http://127.0.0.1:8000/nearest-products/') 
-            .then(response => response.json())
-            .then(data => {
-                const productsContainer = document.getElementById('products-container');
-                data.forEach(product => {
-                    const productElement = document.createElement('div');
-                    productElement.innerHTML = `
-                        <h2>${product.name}</h2>
-                        <p>Description: ${product.description}</p>
-                        <p>Rating: ${product.rating}</p>
-                        <ul>Comments:
-                            ${product.comments.map(comment => `<li>${comment.text}</li>`).join('')}
-                        </ul>
-                    `;
-                    productsContainer.appendChild(productElement);
-                });
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+        // fetch('http://127.0.0.1:8000/nearest-products/') 
+        //     .then(response => response.json())
+        //     .then(data => {
+        //         const productsContainer = document.getElementById('products-container');
+        //         data.forEach(product => {
+        //             const productElement = document.createElement('div');
+        //             productElement.innerHTML = `
+        //                 <h2>${product.name}</h2>
+        //                 <p>Description: ${product.description}</p>
+        //                 <p>Rating: ${product.rating}</p>
+        //                 <ul>Comments:
+        //                     ${product.comments.map(comment => `<li>${comment.text}</li>`).join('')}
+        //                 </ul>
+        //             `;
+        //             productsContainer.appendChild(productElement);
+        //         });
+        //     })
+        //     .catch(error => {
+        //         console.error('Error:', error);
+        //     });
 
         document.getElementById('search-form').addEventListener('submit', function(event) {
             event.preventDefault(); 
@@ -134,8 +164,15 @@
                 const productName = product.querySelector('h2').textContent.toLowerCase();
                 if (productName.includes(searchValue)) {
                     product.style.display = 'block';
+                    const marker = product.marker;
+                    
+                    marker.setMap(map);
+                    
+                    map.setCenter(marker.getPosition());
                 } else {
                     product.style.display = 'none';
+                    
+                    product.marker.setMap(null);
                 }
             });
         });
@@ -149,7 +186,7 @@
                     localStorage.setItem('userLongitude', longitude);
                 });
             } else {
-                console.log('Geolocation is not available');
+                console.log('Геолокация недоступна');
             }
         }
 
@@ -165,6 +202,66 @@
             }
         };
 
+
+        function initMap() {
+            const map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: 51.5074, lng: -0.1278 },
+                zoom: 12
+            });
+
+            navigator.geolocation.getCurrentPosition((position) => {
+                const userLocation = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+                const userMarker = new google.maps.Marker({
+                    position: userLocation,
+                    map: map,
+                    // icon: {
+                    //     url: 'markers/user.png', 
+                    //     scaledSize: new google.maps.Size(40, 40) 
+                    // },
+                    title: 'это вы)'
+                });
+                map.setCenter(userLocation);
+
+                const userLatitude = position.coords.latitude;
+                const userLongitude = position.coords.longitude;
+
+            });
+            const nearestProducts = JSON.parse('{{ nearest_products|escapejs }}');;
+            nearestProducts.forEach(product => {
+                const marker = new google.maps.Marker({
+                    position: { lat: product.seller_latitude, lng: product.seller_longitude },
+                    map: map,
+                    icon: {
+                        url:  product.product.poster , 
+                        scaledSize: new google.maps.Size(40, 40) 
+                    },
+                    title: product.name
+                });
+                marker.addListener('click', () => {
+                        const infoWindow = new google.maps.InfoWindow({
+                            content: `
+                                <h3>${product.name}</h3>
+                                <img src="${ product.product.poster }" alt="${ product.name } Image">
+                                <p>Цена: ${ product.product.price } $</p>
+                                <p>Продавец: ${ product.product.seller }</p>
+                                <p>Описание: ${ product.product.description }</p>
+                                <p>Рейтинг: ${ product.average_rating }</p>
+                            `
+                        });
+
+                        
+                        infoWindow.open(map, marker);
+                    });
+
+            });
+            
+        }
+    
+
     </script>
+    
 </body>
 </html>
