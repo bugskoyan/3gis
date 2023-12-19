@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Добавить организацию</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="text"],
+        input[type="email"],
+        textarea {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #4caf50; 
+        }
+
+        .error {
+            border-color: red; 
+        }
+
+        button[type="submit"] {
+            padding: 10px 20px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Добавить организацию</h1>
+    <form method="post" action="{% url 'add_seller' %}" enctype="multipart/form-data" onsubmit="updateCoordinates(event)">
+        {% csrf_token %}
+        {{ seller_form.as_p }}
+
+        <input type="hidden" name="latitude" id="latitude">
+        <input type="hidden" name="longitude" id="longitude">
+    
+        <button type="submit">Добавить продавца</button>
+    </form>
+    <script>
+        
+        function updateCoordinates(event) {
+            event.preventDefault();
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const userLatitude = position.coords.latitude;
+                    const userLongitude = position.coords.longitude;
+
+                    
+                    localStorage.setItem('latitude', userLatitude);
+                    localStorage.setItem('longitude', userLongitude);
+
+                    
+                    document.getElementById('latitude').value = userLatitude;
+                    document.getElementById('longitude').value = userLongitude;
+
+                    
+                    event.target.submit();
+                },
+                function(error) {
+                    console.error('Error getting user coordinates:', error);
+
+                    
+                    event.target.submit();
+                }
+            );
+        }
+    </script>
+</body>
+</html>

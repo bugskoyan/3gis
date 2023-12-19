@@ -47,6 +47,7 @@ class SellerCommentSerializer(serializers.ModelSerializer):
 
 
 class ProductRatingSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(default=serializers.CurrentUserDefault(), read_only=True)
     class Meta:
         model = ProductRating
         fields = '__all__'

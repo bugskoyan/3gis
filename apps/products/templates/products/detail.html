@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ product.name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('https://img.freepik.com/free-photo/top-view-of-shopping-bags-with-keyboard-and-tag-for-cyber-monday_23-2148657725.jpg?w=996&t=st=1702981130~exp=1702981730~hmac=ce9338f650a4aac4dee5a0087636775b6cdaa4b24395390ea274fad957060d7e');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        #app {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin-bottom: 10px;
+            color: #333;
+            text-align: center;
+        }
+
+        p {
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+        input[type="number"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: vertical;
+        }
+
+        form {
+            margin-top: 15px;
+            margin-bottom: 20px;
+        }
+
+        ul {
+            padding: 0;
+            margin: 20px 0;
+            list-style: none;
+        }
+
+        li {
+            border-bottom: 1px solid #ccc;
+            padding: 10px 0;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .comment-user {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .comment-text {
+            color: #444;
+            margin-bottom: 5px;
+        }
+
+        hr {
+            margin-top: 30px;
+            border: 0;
+            border-top: 1px solid #ccc;
+        }
+
+        #app img {
+            display: block; 
+            margin: 0 auto; 
+            width: auto;
+            height: auto;
+            max-width: 100%; 
+            max-height: 350px; 
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #map iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .map-header {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 24px;
+            color: #333;
+        }
+
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+
+        .rating {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .stars-outer {
+            display: inline-block;
+            font-size: 24px; 
+        }
+
+        .stars-inner {
+            display: flex;
+            color: #f8ce0b; 
+        }
+    </style>
+    <script src="{{ mapkey }}" async defer></script>
+</head>
+<body>
+
+
+    <div id="app">
+        <button onclick="goToNearestProducts()" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; display: block; margin: 20px 0 20px 20px;">
+            Назад к ближайшим продуктам
+        </button>
+
+        {% csrf_token %}
+        <h1>{{ product.name }}</h1>
+        <div class="rating" data-rating="{{ product.average_rating }}">
+            <span class="average-rating visually-hidden">Средний рейтинг: {{ product.average_rating }}</span>
+            <div class="stars-outer">
+                <div class="stars-inner"></div>
+            </div>
+        </div>
+        <img src="{{ product.product.poster }}" alt="{{ product.name }} Image">
+        <p>Цена: {{ product.product.price }} $</p>
+        <p>Продавец: {{ product.product.seller }}</p>
+        <p>Описание: {{ product.product.description }}</p>
+    
+
+
+
+        <div id="map">
+            <iframe
+                width="100%"
+                height="100%"
+                frameborder="0" style="border:0"
+                src="https://www.google.com/maps/embed/v1/place?key={{ mapkey }}&q={{ product.product.seller_latitude }},{{ product.product.seller_longitude }}" allowfullscreen>
+            </iframe>
+        </div>
+
+        <hr>
+
+        <h2 class="map-header">Комментарии</h2>
+        <ul>
+            {% for comment in product.comments %}
+                <li>
+                    <span class="comment-user">{{ comment.user }}</span>
+                    <span class="comment-text">{{ comment.text }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- <div id="map">
+        <div id="info-window-content"></div>
+    </div> -->
+
+    <script>
+
+
+
+
+
+        const detailProduct = JSON.parse('{{ detail_product|escapejs }}');
+
+        function initMap() {
+            const map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: detailProduct.seller_latitude, lng: detailProduct.seller_longitude },
+                zoom: 15
+            });
+
+            navigator.geolocation.getCurrentPosition((position) => {
+                const userLocation = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+                const userMarker = new google.maps.Marker({
+                    position: userLocation,
+                    map: map,
+                    // icon: {
+                    //     url: 'markers/user.png', 
+                    //     scaledSize: new google.maps.Size(40, 40) 
+                    // },
+                    title: 'это вы)'
+                });
+            });
+            
+            const productMarker = new google.maps.Marker({
+                position: { lat: detailProduct.seller_latitude, lng: detailProduct.seller_longitude },
+                map: map,
+                icon: {
+                    url: detailProduct.product.poster,
+                    scaledSize: new google.maps.Size(40, 40)
+                },
+                title: detailProduct.name
+            });
+
+            
+            productMarker.addListener('click', () => {
+                const infoWindow = new google.maps.InfoWindow({
+                    content: `
+                        <h3>${detailProduct.name}</h3>
+                        <img src="${detailProduct.product.poster}" alt="${detailProduct.name} Image">
+                        <p>Цена: ${detailProduct.product.price} $</p>
+                        <p>Продавец: ${detailProduct.product.seller}</p>
+                        <p>Описание: ${detailProduct.product.description}</p>
+                        <p>Рейтинг: ${detailProduct.average_rating} ★</p>
+                    `
+                });
+                infoWindow.open(map, productMarker);
+            });
+
+        }
+
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const ratings = document.querySelectorAll('.rating');
+            ratings.forEach((rating) => {
+                const ratingValue = parseFloat(rating.dataset.rating);
+                const starsInner = rating.querySelector('.stars-inner');
+                const roundedRating = Math.round(ratingValue * 2) / 2; 
+                starsInner.innerHTML = getStars(roundedRating);
+            });
+        });
+
+        function getStars(rating) {
+            const starCount = 5;
+            let starHTML = '';
+            const floorRating = Math.floor(rating);
+            for (let i = 0; i < starCount; i++) {
+                if (i < floorRating) {
+                    starHTML += '★'; 
+                } else if (i === floorRating && rating % 1 !== 0) {
+                    starHTML += '½'; 
+                } else {
+                    starHTML += '☆'; 
+                }
+            }
+            return starHTML;
+        }
+
+
+        function goToNearestProducts() {
+            let latitude = localStorage.getItem('userLatitude');
+            let longitude = localStorage.getItem('userLongitude');
+
+            
+            if (latitude && longitude) {
+                window.location.href = `/nearest-products/?latitude=${latitude}&longitude=${longitude}`;
+            } else {
+                alert('Координаты отсутствуют в localStorage');
+                
+            }
+        }
+    </script>
+</body>
+</html>

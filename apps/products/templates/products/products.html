@@ -6,108 +6,367 @@
     <link rel="icon" href="ico/mapicon.png/" type="image/x-icon">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f4;
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTdEtw5U4RCLN4I8bi3pEhVBxuuOEod5Mwnxx-eopvS8749eX-QglrCoiGC3TnqMnyy2Lw&usqp=CAU');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: #444;
         }
-        h1 {
+
+        /* Стили для заголовка */
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 40px 0;
             text-align: center;
-            margin-bottom: 30px;
-            color: #333;
-        }
-        .product {
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            padding: 20px;
             margin-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 48px;
+            letter-spacing: 2px;
+        }
+
+        p {
+            font-size: 20px;
+            margin-top: 10px;
+        }
+
+
+        .product {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
             background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            margin-bottom: 20px;
         }
-        .product h2 {
+
+        .product:hover {
+            transform: translateY(-5px);
+        }
+
+        .product h2 a {
             margin-top: 0;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
+            font-size: 24px;
             color: #333;
+            cursor: default;
+            transition: color 0.3s ease;
+            text-decoration: none; 
         }
+
+
+
+        .product h2 a:hover {
+            color: #007bff;
+            text-decoration: none; 
+        }
+
+        .product img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        p.product-info {
+            margin: 0;
+            color: #666;
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
         .product p {
             margin: 5px 0;
             color: #666;
+            font-size: 15px;
         }
+
         .product ul {
             margin: 5px 0;
             padding-left: 20px;
             color: #666;
+            font-size: 14px;
         }
+
         .product li {
             list-style: disc;
             margin-left: 10px;
         }
 
-        .product img {
-            align-items: center;
-            max-width: 100%;
-            height: auto;
-            border: 1px solid #ccc;
+        .product button {
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            border: none;
             border-radius: 5px;
-            padding: 5px;
-            box-sizing: border-box;
-            width: 400px; 
-            height: 300px; 
-            object-fit: cover; 
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            max-width: 200px;
+        }
+
+        .product button:hover {
+            background-color: #0056b3;
         }
 
         .search-container {
             margin-bottom: 20px;
             text-align: center;
         }
+
+        .search-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
         #search-input {
-            padding: 8px;
+            padding: 10px;
             border-radius: 5px;
             border: 1px solid #ccc;
             margin-right: 5px;
+            width: 60%;
+            max-width: 300px;
         }
+
         #search-input:focus {
             outline: none;
             border-color: #007bff;
         }
-        #products-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around;
+
+        #show-form-btn {
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
         }
+
+        #show-form-btn:hover {
+            background-color: #0056b3;
+        }
+
+        #show-filter-btn {
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        #show-filter-btn:hover {
+            background-color: #0056b3;
+        }
+
+        #form-container {
+            display: none;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        #form-container h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 22px;
+        }
+
+        #form-container form {
+            margin-bottom: 20px;
+        }
+
+        #form-container input[type="submit"] {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        #form-container input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        #filterbtn {
+            display: none;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        } 
+
+        #products-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            justify-content: center;
+        }
+
         #map {
             height: 400px;
             width: 100%;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #map iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
         
+        input[type="text"],
+        input[type="submit"] {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-right: 5px;
+            width: calc(100% - 25px);
+            max-width: 300px;
+        }
+
+        input[type="text"]:focus,
+        input[type="submit"]:hover {
+            outline: none;
+            border-color: #007bff;
+        }
+        #info-window-content {
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+
+        .rating {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .stars-outer {
+            display: inline-block;
+            font-size: 24px; 
+        }
+
+        .stars-inner {
+            display: flex;
+            color: #f8ce0b; 
+        }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{{ mapkey }}" async defer></script>
 </head>
 <body>
-    <h1>Ближайшие товары</h1>
+    
+    <header>
+        <h1>3GIS - Найдите лучшие предложения рядом</h1>
+        <p>Поиск лучших сделок поблизости!</p>
+    </header>
 
     <div class="search-container">
         <form id="search-form">
             <input type="text" id="search-input" placeholder="Поиск...">
-            <button type="submit">Поиск</button>
         </form>
     </div>
+
+    <button id="show-form-btn">Добавить организацию или товар</button>
+    
+    <div id="form-container" style="display: none;">
+        <h2>Добавить</h2>
+        
+        <form action="{% url 'add_seller' %}" method="post">
+            {% csrf_token %}
+            {{ seller_form.as_p }}
+            <input type="submit" value="Организацию">
+        </form>
+        
+        
+        <form action="{% url 'add_product' %}" method="post">
+            {% csrf_token %}
+            {{ product_form.as_p }}
+            <input type="submit" value="Товар">
+        </form>
+    </div>
+
+    <button id="show-filter-btn">Сортировка</button>
+
+    <div id="filterbtn" style="display: none;">
+        <button onclick="applyFilters('lowToHigh')">По цене (от низкой к высокой)</button>
+        <button onclick="applyFilters('highToLow')">По цене (от высокой к низкой)</button>
+    </div>
+
+    
 
     <div id="products-container">
         {% csrf_token %}
         {% for product in products %}
         <div class="product">
-            <h2>{{ product.name }}</h2>
+            <h2><a href="{% url 'product_retrieve' product.id %}">{{ product.name }}</a></h2>
+            <div class="rating" data-rating="{{ product.average_rating }}">
+                <span class="average-rating visually-hidden">Средний рейтинг: {{ product.average_rating }}</span>
+                <div class="stars-outer">
+                    <div class="stars-inner"></div>
+                </div>
+            </div>
             <img src="{{ product.product.poster }}" alt="{{ product.name }} Image">
-            <p>Цена: {{ product.product.price }} $</p>
-            <p>Продавец: {{ product.product.seller }}</p>
-            <p>Описание: {{ product.product.description }}</p>
-            <p>Рейтинг: {{ product.average_rating }}</p>
-            <ul>Комментарии:
-                {% for comment in product.comments %}
-                <li>{{ comment.user }} : {{ comment.text }} </li>
-                {% endfor %}
-            </ul>
+            <p class="product-info">Цена: {{ product.product.price }} $</p>
+            <p class="product-info">Продавец: {{ product.product.seller }}</p>
+            <p class="product-info">Описание: {{ product.product.description }}</p>          
+            <button onclick="deleteProduct('{{ product.id }}')">Удалить</button>
+            
         </div>
         {% endfor %}
     </div>
@@ -127,10 +386,42 @@
     </div> -->
 
     <div id="map">
-        <div id="info-window-content"></div>
+        <iframe
+            width="100%"
+            height="100%"
+            frameborder="0" style="border:0"
+            src="https://www.google.com/maps/embed/v1/place?key={{ mapkey }}&q={{ product.product.seller_latitude }},{{ product.product.seller_longitude }}" allowfullscreen>
+        </iframe>
     </div>
 
     <script>
+        document.getElementById('show-form-btn').addEventListener('click', function() {
+            const formContainer = document.getElementById('form-container');
+            const formButtons = formContainer.querySelectorAll('input[type="submit"]');
+            
+            if (formContainer.style.display === 'none') {
+                formContainer.style.display = 'block';
+                formButtons.forEach(button => {
+                    button.style.display = 'block';
+                });
+            } else {
+                formContainer.style.display = 'none';
+            }
+        });
+
+        document.getElementById('show-filter-btn').addEventListener('click', function() {
+            const filterbtn = document.getElementById('filterbtn');
+            const filterButtons = filterbtn.querySelectorAll('button');
+
+            if (filterbtn.style.display === 'none') {
+                filterbtn.style.display = 'block';
+                filterButtons.forEach(button => {
+                    button.style.display = 'block';
+                });
+            } else {
+                filterbtn.style.display = 'none';
+            }
+        });
         // fetch('http://127.0.0.1:8000/nearest-products/') 
         //     .then(response => response.json())
         //     .then(data => {
@@ -152,30 +443,37 @@
         //         console.error('Error:', error);
         //     });
 
+
         document.getElementById('search-form').addEventListener('submit', function(event) {
             event.preventDefault(); 
 
-            
             const searchValue = document.getElementById('search-input').value.toLowerCase();
-
-            
             const products = document.getElementsByClassName('product');
+
             Array.from(products).forEach(product => {
                 const productName = product.querySelector('h2').textContent.toLowerCase();
                 if (productName.includes(searchValue)) {
                     product.style.display = 'block';
-                    const marker = product.marker;
-                    
-                    marker.setMap(map);
-                    
-                    map.setCenter(marker.getPosition());
                 } else {
                     product.style.display = 'none';
-                    
-                    product.marker.setMap(null);
                 }
             });
         });
+
+        document.getElementById('search-input').addEventListener('input', function() {
+            const searchValue = this.value.toLowerCase();
+            const products = document.getElementsByClassName('product');
+
+            Array.from(products).forEach(product => {
+                const productName = product.querySelector('h2').textContent.toLowerCase();
+                if (productName.includes(searchValue) || searchValue === '') {
+                    product.style.display = 'block';
+                } else {
+                    product.style.display = 'none';
+                }
+            });
+        });
+
 
         function saveUserLocation() {
             if ("geolocation" in navigator) {
@@ -248,7 +546,7 @@
                                 <p>Цена: ${ product.product.price } $</p>
                                 <p>Продавец: ${ product.product.seller }</p>
                                 <p>Описание: ${ product.product.description }</p>
-                                <p>Рейтинг: ${ product.average_rating }</p>
+                                <p>Рейтинг: ${ product.average_rating } ★</p>
                             `
                         });
 
@@ -261,6 +559,118 @@
         }
     
 
+
+        function deleteProduct(productId) {
+            fetch(`/nearest-products/${productId}/`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Продукт удален');
+                    window.location.reload(); 
+                } else {
+                    console.error('Ошибка при удалении продукта');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при отправке запроса:', error);
+            });
+        }
+
+
+        function applyFilters(sortOrder) {
+            let nearestProducts = JSON.parse('{{ nearest_products|escapejs }}');
+            
+            if (sortOrder === 'lowToHigh') {
+                nearestProducts.sort((a, b) => a.product.price - b.product.price);
+            } else if (sortOrder === 'highToLow') {
+                nearestProducts.sort((a, b) => b.product.price - a.product.price);
+            }
+
+            
+            updateProductList(nearestProducts); 
+        }
+
+        function updateProductList(products) {
+            const productList = document.getElementById('products-container');
+            productList.innerHTML = '';
+
+            products.forEach(product => {
+                const productItem = document.createElement('div');
+                productItem.classList.add('product');
+
+                const productLink = document.createElement('a');
+                productLink.setAttribute('href', `/nearest-products/${product.id}`);
+                productLink.textContent = product.name;
+                const productName = document.createElement('h2');
+                productName.appendChild(productLink);
+
+                const productImage = document.createElement('img');
+                productImage.setAttribute('src', product.product.poster);
+                productImage.setAttribute('alt', `${product.name} Image`);
+
+                const productPrice = document.createElement('p');
+                productPrice.textContent = `Цена: ${product.product.price} $`;
+
+                const productSeller = document.createElement('p');
+                productSeller.textContent = `Продавец: ${product.product.seller}`;
+
+                const productDescription = document.createElement('p');
+                productDescription.textContent = `Описание: ${product.product.description}`;
+
+                const productRating = document.createElement('div');
+                productRating.classList.add('rating');
+                productRating.setAttribute('data-rating', product.average_rating);
+                const starsOuter = document.createElement('div');
+                starsOuter.classList.add('stars-outer');
+                const starsInner = document.createElement('div');
+                starsInner.classList.add('stars-inner');
+                starsInner.style.width = `${(product.average_rating / 5) * 100}%`;
+                starsOuter.appendChild(starsInner);
+                productRating.appendChild(starsOuter);
+
+                productItem.appendChild(productName);
+                productItem.appendChild(productImage);
+                productItem.appendChild(productPrice);
+                productItem.appendChild(productSeller);
+                productItem.appendChild(productDescription);
+                productItem.appendChild(productRating);
+
+                productList.appendChild(productItem);
+            });
+        }
+
+
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const ratings = document.querySelectorAll('.rating');
+            ratings.forEach((rating) => {
+                const ratingValue = parseFloat(rating.dataset.rating);
+                const starsInner = rating.querySelector('.stars-inner');
+                const roundedRating = Math.round(ratingValue * 2) / 2; 
+                starsInner.innerHTML = getStars(roundedRating);
+            });
+        });
+
+        function getStars(rating) {
+            const starCount = 5;
+            let starHTML = '';
+            const floorRating = Math.floor(rating);
+            for (let i = 0; i < starCount; i++) {
+                if (i < floorRating) {
+                    starHTML += '★'; 
+                } else if (i === floorRating && rating % 1 !== 0) {
+                    starHTML += '½'; 
+                } else {
+                    starHTML += '☆'; 
+                }
+            }
+            return starHTML;
+        }
     </script>
     
 </body>

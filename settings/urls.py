@@ -8,7 +8,7 @@ from rest_framework.routers import DefaultRouter
 from apps.products.views import (
     SellerViewSet, ProductViewSet, NearestProductViewSet, ProductCommentViewSet, 
     SellerCommentViewSet,
-    ProductRatingViewSet, SellerRatingViewSet, search_products_view
+    ProductRatingViewSet, SellerRatingViewSet, search_products_view, add_product, add_seller
 )
 
 
@@ -27,6 +27,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(router.urls)),
     path('search-products/', search_products_view, name='search_products'),
+    path('add-seller/', add_seller, name='add_seller'),
+    path('add-product/', add_product, name='add_product'),
+    path('nearest-products/<int:pk>/', NearestProductViewSet.as_view({'get': 'retrieve', 'delete': 'destroy'}), name='product_retrieve'),
 ]
 
 if settings.DEBUG:
