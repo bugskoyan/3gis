@@ -242,7 +242,6 @@ class NearestProductViewSet(viewsets.ModelViewSet):
     def destroy(self, request, pk=None):
         try:
             product = Product.objects.get(pk=pk)
-            # Добавьте проверку прав доступа здесь (например, через permissions)
 
             product.delete()
             return Response({"message": "Продукт успешно удален"}, status=status.HTTP_204_NO_CONTENT)
