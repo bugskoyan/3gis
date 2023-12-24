@@ -4,6 +4,8 @@ from decouple import config
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import query, Avg
+from django.core.paginator import Page, Paginator, EmptyPage
+from django.http import Http404
 
 from rest_framework import status
 from rest_framework import permissions
@@ -15,6 +17,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.validators import ValidationError
 from rest_framework.generics import ListAPIView
+from rest_framework.pagination import PageNumberPagination
 
 
 from products.models import Seller, Product, ProductComment, SellerComment, ProductRating, SellerRating
@@ -90,9 +93,52 @@ def product_detail_view(request, pk):
     })
 
 
+
 class SellerViewSet(viewsets.ModelViewSet):
     queryset = Seller.objects.all()
     serializer_class = SellerSerializer
+
+    def retrieve(self, request, pk=None):
+        seller = self.queryset.get(pk=pk)
+        seller_products = seller.product_set.all()
+        seller_comments = SellerComment.objects.filter(seller=seller)
+        seller_ratings = SellerRating.objects.filter(seller=seller)
+
+        product_average_rating = 0.0
+        if seller_products.exists():
+            product_average_rating = ProductRating.objects.filter(product__in=seller_products).aggregate(Avg('rating'))['rating__avg'] or 0.0
+        
+        average_rating = seller_ratings.aggregate(Avg('rating'))['rating__avg'] if seller_ratings.exists() else 0.0
+
+        detail_seller = {
+            'id': seller.pk,
+            'name': seller.name,
+            'seller_latitude': seller.latitude,
+            'seller_longitude': seller.longitude,
+            'seller': SellerSerializer(seller).data,
+        }
+
+        return render(request, 'products/seller_detail.html', {
+            'seller': seller,
+            'detail_seller': json.dumps(detail_seller),
+            'id': seller.pk,
+            'seller_latitude': seller.latitude,
+            'seller_longitude': seller.longitude,
+            'seller_products': seller_products,
+            'seller_comments': seller_comments,
+            'seller_ratings': seller_ratings,
+            'average_rating': average_rating,
+            'product_average_rating': product_average_rating,
+            'mapkey': config('MAP_KEY', str)
+        })
+
+
+# def seller_detail_view(request, seller_id):
+#     seller = Seller.objects.get(pk=seller_id)
+#     seller_products = Product.objects.filter(seller=seller)
+
+#     return render(request, 'products/seller_detail.html', {'seller': seller, 'seller_products': seller_products})
+
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
@@ -126,33 +172,6 @@ class ProductViewSet(viewsets.ModelViewSet):
     #     except Exception as e:
     #         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-# class NearestProductViewSet(ListAPIView):
-#     serializer_class = ProductSerializer
-#     filter_backends = [OrderingFilter]
-#     # filterset_class = NearestProductFilter
-    
-    
-
-#     def get_queryset(self):
-#         user_latitude = float(self.request.query_params.get('latitude'))
-#         user_longitude = float(self.request.query_params.get('longitude'))
-
-#         queryset = Product.objects.all()
-#         nearest_products = []
-
-#         for product in queryset:
-#             seller = product.seller
-#             distance = ((user_latitude - seller.latitude) ** 2 + (user_longitude - seller.longitude) ** 2) ** 0.5
-#             nearest_products.append((product, distance))
-
-        
-#         nearest_products.sort(key=lambda x: x[0].price)
-
-        
-#         nearest_products.sort(key=lambda x: x[1])
-
-        
-#         return [product for product, _ in nearest_products]
 
 class NearestProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
@@ -166,6 +185,7 @@ class NearestProductViewSet(viewsets.ModelViewSet):
         user_latitude = float(request.query_params.get('latitude'))
         user_longitude = float(request.query_params.get('longitude'))
 
+
         queryset = Product.objects.all()
         nearest_products = []
 
@@ -178,6 +198,7 @@ class NearestProductViewSet(viewsets.ModelViewSet):
                 'name': product.name,
                 'seller_latitude': seller.latitude,
                 'seller_longitude': seller.longitude,
+                'seller_id' : seller.id,
                 'distance': distance,
                 'product': ProductSerializer(product).data,
                 'comments': ProductCommentSerializer(ProductComment.objects.filter(product=product), many=True).data,
@@ -189,23 +210,38 @@ class NearestProductViewSet(viewsets.ModelViewSet):
 
         serialized_products = []
 
-        # for product, distance, seller in nearest_products:
-        #     product_data = ProductSerializer(product).data
-        #     comments = ProductComment.objects.filter(product=product)
-        #     ratings = ProductRating.objects.filter(product=product)
-        #     average_rating = ratings.aggregate(Avg('rating'))['rating__avg']
-        #     product_data['comments'] = ProductCommentSerializer(comments, many=True).data
-        #     product_data['ratings'] = ProductRatingSerializer(ratings, many=True).data
-        #     product_data['average_rating'] = average_rating if average_rating else 0.0
-        #     product_data['seller_latitude'] = seller.latitude
-        #     product_data['seller_longitude'] = seller.longitude
-        #     serialized_products.append(product_data)
-        
+
+        latitude = request.query_params.get('latitude', user_latitude)
+        longitude = request.query_params.get('longitude', user_longitude)
+
+        paginator = Paginator(nearest_products, self.pagination_class.page_size)
+        page_number = request.query_params.get(self.pagination_class.page_query_param, 1)
+
+        try:
+            page = paginator.page(page_number)
+        except EmptyPage as e:
+            raise Http404("Invalid page number") from e
+
+        serialized_page = [
+            {
+                'id': item['id'],
+                'name': item['name'],
+                'seller_latitude': item['seller_latitude'],
+                'seller_longitude': item['seller_longitude'],
+                'distance': item['distance'],
+                'product': item['product'],
+                'comments': item['comments'],
+                'ratings': item['ratings'],
+                'average_rating': item['average_rating'],
+            }
+            for item in page.object_list
+        ]
 
 
         context = {'nearest_products': json.dumps(nearest_products), 
                    'products': nearest_products,
-                   'mapkey' : config('MAP_KEY', str)
+                   'mapkey' : config('MAP_KEY', str),
+                   'products_page' : page
                    }
         return render(request, 'products/products.html', context)
 
@@ -223,6 +259,7 @@ class NearestProductViewSet(viewsets.ModelViewSet):
                 'name': product.name,
                 'seller_latitude': seller.latitude,
                 'seller_longitude': seller.longitude,
+                'seller_id' : seller.id,
                 'product': ProductSerializer(product).data,
                 'comments': ProductCommentSerializer(ProductComment.objects.filter(product=product), many=True).data,
                 'ratings': ProductRatingSerializer(ProductRating.objects.filter(product=product), many=True).data,

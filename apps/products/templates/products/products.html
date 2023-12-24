@@ -305,6 +305,50 @@
             display: flex;
             color: #f8ce0b; 
         }
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .pagination a {
+            padding: 8px 16px;
+            text-decoration: none;
+            border: 1px solid #007bff;
+            color: #007bff;
+            margin: 0 4px;
+            border-radius: 4px;
+        }
+
+        .pagination a:hover {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .pagination span {
+            padding: 8px 16px;
+            border: 1px solid #ccc;
+            margin: 0 4px;
+            border-radius: 4px;
+        }
+        button {
+            transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+        .product p.product-info a {
+            color: inherit;
+            text-decoration: none;
+            transition: color 0.3s ease; 
+        }
+
+        .product p.product-info a:hover {
+            color: #007bff; 
+        }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{{ mapkey }}" async defer></script>
@@ -363,27 +407,28 @@
             </div>
             <img src="{{ product.product.poster }}" alt="{{ product.name }} Image">
             <p class="product-info">Цена: {{ product.product.price }} $</p>
-            <p class="product-info">Продавец: {{ product.product.seller }}</p>
+            <p class="product-info">Продавец: <a href="{% url 'seller_detail' pk=product.seller_id %}">{{ product.product.seller }}</a></p>
             <p class="product-info">Описание: {{ product.product.description }}</p>          
             <button onclick="deleteProduct('{{ product.id }}')">Удалить</button>
             
         </div>
         {% endfor %}
+
     </div>
-
-    <!-- <div class="pagination">
-        {% if products.previous %}
-            <a href="?page=1">Первая</a>
-            <a href="?page={{ products.pages }}">Предыдущая</a>
+    <!-- {% if products_page %}
+    <div class="pagination">
+        {% if products_page.has_previous %}
+            <a href="?page={{ products_page.previous_page_number }}&latitude={{ latitude }}&longitude={{ longitude }}">Previous</a>
         {% endif %}
-
-        <span>Страница {{ products.number }} из {{ products.paginator.num_pages }}</span>
-
-        {% if products.next %}
-            <a href="?page={{ products.next_page_number }}">Следующая</a>
-            <a href="?page={{ products.paginator.num_pages }}">Последняя</a>
+        
+        <span>Page {{ products_page.number }} of {{ products_page.paginator.num_pages }}</span>
+        
+        {% if products_page.has_next %}
+            <a href="?page={{ products_page.next_page_number }}&latitude={{ latitude }}&longitude={{ longitude }}">Next</a>
         {% endif %}
-    </div> -->
+    </div>
+    {% endif %} -->
+
 
     <div id="map">
         <iframe
@@ -533,8 +578,16 @@
                     position: { lat: product.seller_latitude, lng: product.seller_longitude },
                     map: map,
                     icon: {
-                        url:  product.product.poster , 
-                        scaledSize: new google.maps.Size(40, 40) 
+                        url: product.product.poster,
+                        scaledSize: new google.maps.Size(40, 40),
+                        labelOrigin: new google.maps.Point(20, 20), 
+                        anchor: new google.maps.Point(20, 40), 
+                        label: {
+                            color: 'black',
+                            fontWeight: 'bold',
+                            fontSize: '12px',
+                            text: ' ',
+                        },
                     },
                     title: product.name
                 });
@@ -671,6 +724,21 @@
             }
             return starHTML;
         }
+
+
+        
+        const userLatitude = localStorage.getItem('userLatitude');
+        const userLongitude = localStorage.getItem('userLongitude');
+
+        
+        document.querySelectorAll('.pagination a').forEach((link) => {
+            const href = link.getAttribute('href');
+            if (href.includes('?')) {
+                link.setAttribute('href', `${href}&latitude=${userLatitude}&longitude=${userLongitude}`);
+            } else {
+                link.setAttribute('href', `${href}?latitude=${userLatitude}&longitude=${userLongitude}`);
+            }
+        });
     </script>
     
 </body>

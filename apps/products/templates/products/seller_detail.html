@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>3GIS - {{ product.name }}</title>
+    <title>3GIS - {{ seller.name }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-image: url('https://img.freepik.com/free-photo/top-view-of-shopping-bags-with-keyboard-and-tag-for-cyber-monday_23-2148657725.jpg?w=996&t=st=1702981130~exp=1702981730~hmac=ce9338f650a4aac4dee5a0087636775b6cdaa4b24395390ea274fad957060d7e');
+            background-image: url('https://img.freepik.com/free-vector/abstract-white-shapes-background_79603-1362.jpg?size=626&ext=jpg&ga=GA1.1.1546980028.1703289600&semt=ais');
             background-size: cover;
             background-repeat: no-repeat;
             background-attachment: fixed;
@@ -118,13 +118,11 @@
             overflow: hidden;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-
         #map iframe {
             width: 100%;
             height: 100%;
             border: none;
         }
-
         .map-header {
             text-align: center;
             margin-bottom: 10px;
@@ -158,15 +156,58 @@
             display: flex;
             color: #f8ce0b; 
         }
-        p a {
+        ul {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin: 0;
+            padding: 0;
+        }
+
+        li {
+            flex: 0 1 calc(33.333% - 20px); 
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            overflow: hidden;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        li:hover {
+            transform: translateY(-5px);
+        }
+
+        li img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+
+        li h3 {
+            font-size: 18px;
+            color: #333;
+            margin: 15px;
+        }
+
+        li p {
+            color: #666;
+            margin: 0 15px 15px;
+            font-size: 14px;
+        }
+        li h3 a {
             text-decoration: none;
             color: inherit;
             transition: color 0.3s ease-in-out;
         }
 
-        p a:hover {
+        li h3 a:hover {
             color: #0056b3; 
         }
+
+        
         button {
             transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out;
         }
@@ -175,60 +216,88 @@
             background-color: #0056b3;
             transform: scale(1.05);
         }
+
+        
+        @media (max-width: 768px) {
+            li {
+                flex: 0 1 calc(50% - 20px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            li {
+                flex: 0 1 calc(100% - 20px);
+            }
+        }
     </style>
     <script src="{{ mapkey }}" async defer></script>
 </head>
 <body>
-
-
     <div id="app">
         <button onclick="goToNearestProducts()" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; display: block; margin: 20px 0 20px 20px;">
             Назад к ближайшим продуктам
         </button>
 
-        {% csrf_token %}
-        <h1>{{ product.name }}</h1>
-        <div class="rating" data-rating="{{ product.average_rating }}">
-            <span class="average-rating visually-hidden">Средний рейтинг: {{ product.average_rating }}</span>
+        <h1>{{ seller.name }}</h1>
+        <div class="rating" data-rating="{{ average_rating }}">
+            <span class="average-rating visually-hidden">Средний рейтинг: {{ average_rating }}</span>
             <div class="stars-outer">
                 <div class="stars-inner"></div>
             </div>
         </div>
-        <img src="{{ product.product.poster }}" alt="{{ product.name }} Image">
-        <p>Цена: {{ product.product.price }} $</p>
-        <p>Продавец: <a href="{% url 'seller_detail' pk=product.seller_id %}">{{ product.product.seller }}</a></p>
-        <p>Описание: {{ product.product.description }}</p>
-    
-
-
+        <img src="{{ seller.poster.url }}" alt="{{ seller.name }} Image">
+        <p>Адресс: {{ seller.adress }}</p>
+        <p>Телефон: {{ seller.phone_number }}</p>
+        <p>Описание: {{ seller.description }}</p>
 
         <div id="map">
             <iframe
                 width="100%"
                 height="100%"
                 frameborder="0" style="border:0"
-                src="https://www.google.com/maps/embed/v1/place?key={{ mapkey }}&q={{ product.product.seller_latitude }},{{ product.product.seller_longitude }}" allowfullscreen>
+                src="https://www.google.com/maps/embed/v1/place?key={{ mapkey }}&q={{ seller.latitude }},{{ seller.longitude }}" allowfullscreen>
             </iframe>
         </div>
 
         <hr>
 
+        <h2>Товары:</h2>
+        <ul>
+            {% csrf_token %}
+            {% for product in seller_products %}
+                <li>
+                    <h3><a href="{% url 'product_retrieve' product.pk %}">{{ product.name }}</a></h3>
+                    <div class="rating" data-rating="{{ product_average_rating }}">
+                        <span class="average-rating visually-hidden">Средний рейтинг: {{ product_average_rating }}</span>
+                        <div class="stars-outer">
+                            <div class="stars-inner"></div>
+                        </div>
+                    </div>
+                    <img src="{{ product.poster.url }}" alt="{{ product.name }} Poster">
+                    <p>Цена: {{ product.price }} $</p>
+                    <p>Описание: {{ product.description }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+        
+
         <h2 class="map-header">Комментарии</h2>
         <ul>
-            {% for comment in product.comments %}
+            {% for comment in seller.comments.all %}
                 <li>
-                    <span class="comment-user">{{ comment.user }}</span>
+                    <span class="comment-user">{{ comment.user }} - {{ comment.created_at }}</span>
                     <span class="comment-text">{{ comment.text }}</span>
                 </li>
             {% endfor %}
         </ul>
     </div>
+
     <script>
-        const detailProduct = JSON.parse('{{ detail_product|escapejs }}');
+        const detailSeller = JSON.parse('{{ detail_seller|escapejs }}');
 
         function initMap() {
             const map = new google.maps.Map(document.getElementById('map'), {
-                center: { lat: detailProduct.seller_latitude, lng: detailProduct.seller_longitude },
+                center: { lat: detailSeller.seller_latitude, lng: detailSeller.seller_longitude },
                 zoom: 15
             });
 
@@ -248,30 +317,30 @@
                 });
             });
             
-            const productMarker = new google.maps.Marker({
-                position: { lat: detailProduct.seller_latitude, lng: detailProduct.seller_longitude },
+            const sellerMarker = new google.maps.Marker({
+                position: { lat: detailSeller.seller_latitude, lng: detailSeller.seller_longitude },
                 map: map,
                 icon: {
-                    url: detailProduct.product.poster,
+                    url: detailSeller.seller.poster,
                     scaledSize: new google.maps.Size(40, 40)
                 },
-                title: detailProduct.name
+                title: detailSeller.name
             });
 
             
-            productMarker.addListener('click', () => {
-                const infoWindow = new google.maps.InfoWindow({
-                    content: `
-                        <h3>${detailProduct.name}</h3>
-                        <img src="${detailProduct.product.poster}" alt="${detailProduct.name} Image">
-                        <p>Цена: ${detailProduct.product.price} $</p>
-                        <p>Продавец: ${detailProduct.product.seller}</p>
-                        <p>Описание: ${detailProduct.product.description}</p>
-                        <p>Рейтинг: ${detailProduct.average_rating} ★</p>
-                    `
-                });
-                infoWindow.open(map, productMarker);
-            });
+            // sellerMarker.addListener('click', () => {
+            //     const infoWindow = new google.maps.InfoWindow({
+            //         content: `
+            //             <h3>${detailSeller.name}</h3>
+            //             <img src="${detailProduct.product.poster}" alt="${detailProduct.name} Image">
+            //             <p>Цена: ${detailProduct.product.price} $</p>
+            //             <p>Продавец: ${detailProduct.product.seller}</p>
+            //             <p>Описание: ${detailProduct.product.description}</p>
+            //             <p>Рейтинг: ${detailProduct.average_rating} ★</p>
+            //         `
+            //     });
+            //     infoWindow.open(map, productMarker);
+            // });
 
         }
 

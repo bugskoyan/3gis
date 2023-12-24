@@ -30,6 +30,8 @@ urlpatterns = [
     path('add-seller/', add_seller, name='add_seller'),
     path('add-product/', add_product, name='add_product'),
     path('nearest-products/<int:pk>/', NearestProductViewSet.as_view({'get': 'retrieve', 'delete': 'destroy'}), name='product_retrieve'),
+    # path('seller/<int:seller_id>/', seller_detail_view, name='seller_detail'),
+    path('seller/<int:pk>/', SellerViewSet.as_view({'get': 'retrieve'}), name='seller_detail'),
 ]
 
 if settings.DEBUG:

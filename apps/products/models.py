@@ -14,6 +14,19 @@ class Seller(models.Model):
     longitude = models.FloatField(
         verbose_name= 'долгота',
     )
+    adress = models.CharField(
+        verbose_name = 'адресс',
+        max_length = 100,
+        null = True,
+        blank = True
+    )
+    phone_number = models.DecimalField(
+        verbose_name = 'номер телефона',
+        max_digits = 11,
+        decimal_places = 0,
+        null = True,
+        blank = True
+    )
     poster: str = models.ImageField(
         verbose_name='постер',
         upload_to='posters',
